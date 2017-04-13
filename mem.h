@@ -1,3 +1,7 @@
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+#include<unistd.h>
 #define MEMORY_SPACE 1000 // number of Default array size
 
 struct memory_node {
