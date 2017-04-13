@@ -19,10 +19,6 @@ struct memory_queue {
   struct memory_queue *next;
 };
 
-
-
-
-
 struct memory_node *node_current = NULL;
 
 struct memory_queue *queue_head = NULL;
@@ -49,9 +45,11 @@ void allocateMem( int processID, int memSize ) {
 
   // now make the new process node's next to the new changed empty block.
 
-  // now also
+  // now also loop through to check which one has the address of 0, and it will point to it.
+
+  // if the memory doesnt not have enough memory, store in to queue.
+
   struct memory_node *new_node = (struct memory_node*) malloc(sizeof(struct memory_node));
-  node_head
 
 
 }
@@ -60,6 +58,12 @@ void deleteMem( int processID ) {
   // loop through the memory node to check for a process with the processID.
 
   // set the process id to 0, to indicate that it's an empty block
+
+  // loop through the memory nodes to check if any two empty blocks are adjacent.
+
+  // if they are, make it one empty memory block.
+
+  // after removing, now loop through the queues to check if there any processes that can fit now. We can use this to call allocateMem
 
 }
 
