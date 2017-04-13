@@ -51,8 +51,10 @@ void allocateMem( int processID, int memSize ) {
       node_current->next = new_empty_node;
       node_current->process_id = processID;
       break;
-    }else{
+    }else if (node_current->process_id == 0 && node_current->size < memSize){
       printf("Not enough memory\n");
+    }else{
+
     }
     node_current = node_current->next;
   }
@@ -85,10 +87,42 @@ void deleteMem( int processID ) {
   // if they are, make it one empty memory block.
 
   // after removing, now loop through the queues to check if there any processes that can fit now. We can use this to call allocateMem
+  node_current = node_head;
+  while (node_current!= NULL){
+    if (node_current->process_id == processID){
+      node_current->process_id = 0;
+    }
+    node_current = node_current->next;
+  }
+
+  node_current = node_head;
+  while (node_current!= NULL){
+    if (node_current->process_id == 0){
+      if (node_current->next != NULL){
+        if (node_current->next->process_id == 0){
+          node_current->size = node_current->size + node_current->next->size;
+          node_current->next = node_current->next->next;
+        }
+      }
+    }
+    node_current = node_current->next;
+  }
 
 }
 
 void print() {
+  printf("-------------------------------------------------------------------------------------------\n");
+  printf("Allocation Queue: \n");
+  node_current = node_head;
+  while (node_current!= NULL){
+    if (node_current->process_id > 0){
+      printf("Process %d:           %dkB     Start Address: %d    End Address: %d\n", node_current->process_id, node_current->size, node_current->start, node_current->start + node_current->size);
+    }else{
+      printf("Empty Block %d:       %dkB     Start Address: %d    End Address: %d\n", node_current->process_id, node_current->size, node_current->start, node_current->start + node_current->size);
+    }
+
+    node_current = node_current->next;
+  }
 
 }
 
@@ -97,9 +131,11 @@ void print() {
 
 int main() {
   initialize();
-  allocateMem(1, 500);
+  allocateMem(1, 200);
   allocateMem(2, 500);
-  allocateMem(2, 500);
+  allocateMem(2, 100);
+  print();
+  // deleteMem(1);
 
 
 
