@@ -55,7 +55,6 @@ void allocateMem( int processID, int memSize ) {
       printf("Not enough memory\n");
     }
     node_current = node_current->next;
-
   }
 
   // choose the first one that has memory by comparing the memory sizes.
@@ -100,6 +99,8 @@ int main() {
   initialize();
   allocateMem(1, 500);
   allocateMem(2, 500);
+  allocateMem(2, 500);
+
 
 
 }
