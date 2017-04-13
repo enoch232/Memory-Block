@@ -21,7 +21,7 @@ struct memory_queue {
 
 struct memory_node *node_head;
 struct memory_node *node_current = NULL;
-struct memory_queue *queue_head = NULL;
+struct memory_queue *queue_head;
 struct memory_queue *queue_current = NULL;
 
 void initialize(){
@@ -51,12 +51,33 @@ void allocateMem( int processID, int memSize ) {
       node_current->process_id = processID;
       break;
     }else if (node_current->process_id == 0 && node_current->size < memSize){
-      // printf("Not enough memory\n");
-      struct memory_queue *new_queue = (struct memory_queue*) malloc(sizeof(struct memory_queue));
-      new_queue->next = queue_head;
-      new_queue->process_id = processID;
-      new_queue->size = memSize;
-      queue_head = new_queue;
+      // struct memory_queue *new_queue = (struct memory_queue*) malloc(sizeof(struct memory_queue));
+      // new_queue->next = queue_head;
+      // new_queue->process_id = processID;
+      // new_queue->size = memSize;
+      // queue_head = new_queue;
+      if (queue_head == NULL){
+        struct memory_queue *new_queue = (struct memory_queue*) malloc(sizeof(struct memory_queue));
+        new_queue->process_id = processID;
+        new_queue->size = memSize;
+        new_queue->next = NULL;
+        queue_head = new_queue;
+      }else{
+        queue_current = queue_head;
+        while (queue_current!= NULL){
+          if (queue_current->next== NULL){
+            break;
+          }
+          queue_current = queue_current->next;
+
+        }
+        struct memory_queue *new_queue = (struct memory_queue*) malloc(sizeof(struct memory_queue));
+        new_queue->process_id = processID;
+        new_queue->size = memSize;
+        new_queue->next = NULL;
+        queue_current->next = new_queue;
+      }
+
     }else{
 
     }
@@ -108,15 +129,8 @@ int allocateMemWithoutQueue( int processID, int memSize ) {
   }
   if (success) {
     queue_current = queue_head;
-    while (queue_current!= NULL){
-      if (queue_current->next== NULL){
-        break;
-      }
-      queue_current = queue_current->next;
-
-    }
-    queue_current = NULL;
-    // allocateMemWithoutQueue();
+    queue_head = queue_current->next;
+    allocateMemWithoutQueue(queue_current->process_id, queue_current->size);
   }
   return success;
 
@@ -187,7 +201,7 @@ void print() {
   node_current = node_head;
   while (node_current!= NULL){
     if (node_current->process_id > 0){
-      printf("Process %d:           %dkB     Start Address: 0x%08X    End Address: 0x%08X\n", node_current->process_id, node_current->size, node_current->start * 1000, (node_current->start + node_current->size) * 1000 - 1);
+      printf("Process %d:            %dkB     Start Address: 0x%08X    End Address: 0x%08X\n", node_current->process_id, node_current->size, node_current->start * 1000, (node_current->start + node_current->size) * 1000 - 1);
     }else{
       printf("Empty Block:          %dkB     Start Address: 0x%08X    End Address: 0x%08X\n", node_current->size, node_current->start * 1000, (node_current->start + node_current->size) * 1000 - 1);
     }
@@ -213,7 +227,7 @@ int main() {
   allocateMem(3, 400);
   allocateMem(4, 400);
   deleteMem(1);
-  // deleteMem(2);
+  deleteMem(2);
   // deleteMem(1);
   print();
 
