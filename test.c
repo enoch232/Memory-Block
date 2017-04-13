@@ -44,13 +44,13 @@ void allocateMem( int processID, int memSize ) {
         // create a new empty node, and connect the existing empty node to the new empty node as if it was a new block of memory.
         // This is to ensure that we have reference to the previous node, so that we can set the 'next'.
         struct memory_node *new_empty_node = (struct memory_node*) malloc(sizeof(struct memory_node));
-        new_empty_node->process_id = 0;
-        new_empty_node->size = node_current->size - memSize;
-        new_empty_node->start = node_current->start + memSize;
-        new_empty_node->next = node_current->next;
-        node_current->size = memSize;
-        node_current->process_id = processID;
-        node_current->next = new_empty_node;
+        new_empty_node->process_id = 0; // create a new empty_node, process_of 0 is empty block
+        new_empty_node->size = node_current->size - memSize; // update the empty block's new memory size.
+        new_empty_node->start = node_current->start + memSize; // update the empty block's new start, it will be after the new node.
+        new_empty_node->next = node_current->next; // point the empty node's to what old empty block was pointing to.
+        node_current->size = memSize; //now node_current is the new memory block instead of empty block, so it will contain the memSize
+        node_current->process_id = processID; //store processID
+        node_current->next = new_empty_node; // now
       }else{ // if the new memory is equal to the empty memory block, don't create any space, but simply replace it.
         node_current->size = memSize;
         node_current->process_id = processID;
@@ -60,15 +60,16 @@ void allocateMem( int processID, int memSize ) {
 
 
     }else if (node_current->process_id == 0 && node_current->size < memSize){ // if the empty block actually is smaller than the requested memory,
-
-      if (queue_head == NULL){
-        struct memory_queue *new_queue = (struct memory_queue*) malloc(sizeof(struct memory_queue));
-        new_queue->process_id = processID;
-        new_queue->size = memSize;
-        new_queue->next = NULL;
-        queue_head = new_queue;
-      }else{
-        queue_current = queue_head;
+      // then we need to store the memory into the queue for later use.
+      if (queue_head == NULL){ // if there are no elements in the queue,
+        struct memory_queue *new_queue = (struct memory_queue*) malloc(sizeof(struct memory_queue)); //create a new queue.
+        new_queue->process_id = processID; // store process info
+        new_queue->size = memSize; // store process info
+        new_queue->next = NULL; // next will point to NULL.
+        queue_head = new_queue; // now THAT will be pointed by the head, since it's the first queue element, first to get out.
+      }else{ // if there are more than one elements in the queue,
+        queue_current = queue_head; // get the first element in the queue, and set the current_queue to that.
+        // traverse until the last node, in order to add a new element to the end of linkedlist.
         while (queue_current!= NULL){
           if (queue_current->next== NULL){
             break;
@@ -76,19 +77,21 @@ void allocateMem( int processID, int memSize ) {
           queue_current = queue_current->next;
 
         }
+        // create the new queue,
         struct memory_queue *new_queue = (struct memory_queue*) malloc(sizeof(struct memory_queue));
-        new_queue->process_id = processID;
-        new_queue->size = memSize;
-        new_queue->next = NULL;
-        queue_current->next = new_queue;
+        new_queue->process_id = processID; // store process info
+        new_queue->size = memSize; // store process info
+        new_queue->next = NULL; // store process info
+        queue_current->next = new_queue; // now set the next to the current pointer.
       }
 
     }else{
-
+      // do no thing if it's not an empty block
     }
+    // move to next.
     node_current = node_current->next;
   }
-
+  // Algorithm:
   // choose the first one that has memory by comparing the memory sizes.
 
   // if the empty block has enough memory,
@@ -107,15 +110,15 @@ void allocateMem( int processID, int memSize ) {
 
 }
 
+// this allocateMem is used so that it doesn't create a queue for not being able to fit it in the memory.
 int allocateMemWithoutQueue( int processID, int memSize ) {
   // Loop through the memory node to check for any empty blocks that have enough room for this one.
-  // printf("Add Process %d with memory %d\n", processID, memSize);
   node_current = node_head;
-  int success = 0;
-  while (node_current!= NULL){
-    if (node_current->process_id == 0 && node_current->size >= memSize){
-      if ((node_current->size - memSize) > 0){
-        struct memory_node *new_empty_node = (struct memory_node*) malloc(sizeof(struct memory_node));
+  int success = 0; //flag to check if memory has been allocated.
+  while (node_current!= NULL){ // traverse through memory linkedlist
+    if (node_current->process_id == 0 && node_current->size >= memSize){ // if the empty block has memory to fit the new allocated memory,
+      if ((node_current->size - memSize) > 0){ // check if it fit's perfectly.
+        struct memory_node *new_empty_node = (struct memory_node*) malloc(sizeof(struct memory_node)); // create new empty_node
         new_empty_node->process_id = 0;
         new_empty_node->size = node_current->size - memSize;
         new_empty_node->start = node_current->start + memSize;
@@ -123,26 +126,28 @@ int allocateMemWithoutQueue( int processID, int memSize ) {
         node_current->size = memSize;
         node_current->process_id = processID;
         node_current->next = new_empty_node;
-      }else{
+      }else{ // if it fit's perfectly in the empty memory, don't create any new empty memory block, and just replace it with memory block.
         node_current->size = memSize;
         node_current->process_id = processID;
       }
       success = 1;
       break;
     }else if (node_current->process_id == 0 && node_current->size < memSize){
+      // do nothing
     }else{
+      // do nothing if process id is not 0, meaning if the memory block is not an empty block...
     }
     node_current = node_current->next;
   }
-  if (success) {
+  if (success) { // if there was an allocation of memory block,
     queue_current = queue_head;
-    if (queue_current != NULL){
-      queue_head = queue_current->next;
-      allocateMemWithoutQueue(queue_current->process_id, queue_current->size);
+    if (queue_current != NULL){ // check if the current queue pointed is not NULL, this is required so that ->next won't show error.
+      queue_head = queue_current->next; // update the queue head, since queue head holds the first element that was added to the queue. Basically pops off the first one that came in.
+      allocateMemWithoutQueue(queue_current->process_id, queue_current->size); // allocate memory with the new element now.
     }
 
   }
-  return success;
+  return success; // return the flag
 
 }
 
