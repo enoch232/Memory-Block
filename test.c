@@ -52,6 +52,11 @@ void allocateMem( int processID, int memSize ) {
       break;
     }else if (node_current->process_id == 0 && node_current->size < memSize){
       // printf("Not enough memory\n");
+      struct memory_queue *new_queue = (struct memory_queue*) malloc(sizeof(struct memory_queue));
+      new_queue->next = queue_head;
+      new_queue->process_id = processID;
+      new_queue->size = memSize;
+      queue_head = new_queue;
     }else{
 
     }
@@ -119,6 +124,7 @@ void deleteMem( int processID ) {
   }
 
   mergeFreeMem();
+  
 
 
 
@@ -137,6 +143,12 @@ void print() {
 
     node_current = node_current->next;
   }
+  printf("\nInput Queue: \n");
+  queue_current = queue_head;
+  while (queue_current!= NULL){
+    printf("Process %d:           %dkB\n", queue_current->process_id, queue_current->size);
+    queue_current = queue_current->next;
+  }
 
 }
 
@@ -147,9 +159,11 @@ int main() {
   initialize();
   allocateMem(1, 400);
   allocateMem(2, 400);
+  allocateMem(3, 400);
+  allocateMem(4, 400);
   // deleteMem(1);
-  deleteMem(2);
-  deleteMem(1);
+  // deleteMem(2);
+  // deleteMem(1);
   print();
 
   // allocateMem(1, 400);
