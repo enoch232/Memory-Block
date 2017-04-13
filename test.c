@@ -18,9 +18,9 @@ struct memory_queue {
   int size;
   struct memory_queue *next;
 };
+
 struct memory_node *node_head;
 struct memory_node *node_current = NULL;
-
 struct memory_queue *queue_head = NULL;
 struct memory_queue *queue_current = NULL;
 
@@ -34,12 +34,11 @@ void initialize(){
 
 void allocateMem( int processID, int memSize ) {
   // Loop through the memory node to check for any empty blocks that have enough room for this one.
-  printf("Add Process %d with memory %d\n", processID, memSize);
+  // printf("Add Process %d with memory %d\n", processID, memSize);
   node_current = node_head;
   while (node_current!= NULL){
-    printf("size: %d\n", node_current->size);
     if (node_current->process_id == 0 && node_current->size >= memSize){
-      printf("Enough memory\n");
+      // printf("Enough memory\n");
       // since we need the context to previous node in order to connect from previous node to the new node,
       struct memory_node *new_empty_node = (struct memory_node*) malloc(sizeof(struct memory_node));
       // store the current empty node's size - newmem size to the new empty.
@@ -52,7 +51,7 @@ void allocateMem( int processID, int memSize ) {
       node_current->process_id = processID;
       break;
     }else if (node_current->process_id == 0 && node_current->size < memSize){
-      printf("Not enough memory\n");
+      // printf("Not enough memory\n");
     }else{
 
     }
@@ -77,6 +76,29 @@ void allocateMem( int processID, int memSize ) {
 
 }
 
+int mergeFreeMem() {
+  node_current = node_head;
+  int changed = 0;
+  while (node_current!= NULL){
+    if (node_current->process_id == 0){
+      if (node_current->next != NULL){
+        if (node_current->next->process_id == 0){
+          // printf("changed!\n");
+          node_current->size = node_current->size + node_current->next->size;
+          node_current->next = node_current->next->next;
+          changed = 1;
+
+          // node_current = node_head;
+        }
+      }
+    }
+    node_current = node_current->next;
+  }
+  if (changed) {
+    mergeFreeMem();
+  }
+}
+
 void deleteMem( int processID ) {
   // loop through the memory node to check for a process with the processID.
 
@@ -95,19 +117,9 @@ void deleteMem( int processID ) {
     node_current = node_current->next;
   }
 
-  node_current = node_head;
-  while (node_current!= NULL){
-    if (node_current->process_id == 0){
-      if (node_current->next != NULL){
-        if (node_current->next->process_id == 0){
-          printf("changed!\n");
-          node_current->size = node_current->size + node_current->next->size;
-          node_current->next = node_current->next->next;
-        }
-      }
-    }
-    node_current = node_current->next;
-  }
+  mergeFreeMem();
+
+
 
 }
 
@@ -133,20 +145,26 @@ void print() {
 int main() {
   initialize();
   allocateMem(1, 400);
-  allocateMem(2, 200);
-  allocateMem(3, 500);
-  print();
+  allocateMem(2, 400);
+  // deleteMem(1);
+  deleteMem(2);
   deleteMem(1);
   print();
-  allocateMem(4, 100);
-  print();
-  deleteMem(2);
-  print();
-  deleteMem(4);
-  print();
-  deleteMem(3);
-  print();
+
+  // allocateMem(1, 400);
+  // allocateMem(2, 200);
+  // allocateMem(3, 500);
+  // print();
   // deleteMem(1);
+  // print();
+  // allocateMem(4, 100);
+  // print();
+  // deleteMem(2);
+  // print();
+  // deleteMem(4);
+  // print();
+  // deleteMem(3);
+  // print();
 
 
 
