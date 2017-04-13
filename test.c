@@ -224,10 +224,9 @@ int main() {
   initialize();
   allocateMem(1, 400);
   allocateMem(2, 400);
-  allocateMem(3, 400);
-  allocateMem(4, 400);
-  deleteMem(1);
-  deleteMem(2);
+  allocateMem(3, 200);
+  // deleteMem(1);
+  // deleteMem(2);
   // deleteMem(1);
   print();
 
