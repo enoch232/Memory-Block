@@ -40,22 +40,34 @@ void allocateMem( int processID, int memSize ) {
     if (node_current->process_id == 0 && node_current->size >= memSize){
       // printf("Enough memory\n");
       // since we need the context to previous node in order to connect from previous node to the new node,
-      struct memory_node *new_empty_node = (struct memory_node*) malloc(sizeof(struct memory_node));
-      // store the current empty node's size - newmem size to the new empty.
-      new_empty_node->process_id = 0;
-      new_empty_node->size = node_current->size - memSize;
-      new_empty_node->start = node_current->start + memSize;
-      new_empty_node->next = node_current->next;
-      node_current->size = memSize;
-      node_current->next = new_empty_node;
-      node_current->process_id = processID;
+      // struct memory_node *new_empty_node = (struct memory_node*) malloc(sizeof(struct memory_node));
+      // // store the current empty node's size - newmem size to the new empty.
+      // new_empty_node->process_id = 0;
+      // new_empty_node->size = node_current->size - memSize;
+      // new_empty_node->start = node_current->start + memSize;
+      // new_empty_node->next = node_current->next;
+      // node_current->size = memSize;
+      // node_current->next = new_empty_node;
+      // node_current->process_id = processID;
+      if ((node_current->size - memSize) > 0){
+        struct memory_node *new_empty_node = (struct memory_node*) malloc(sizeof(struct memory_node));
+        new_empty_node->process_id = 0;
+        new_empty_node->size = node_current->size - memSize;
+        new_empty_node->start = node_current->start + memSize;
+        new_empty_node->next = node_current->next;
+        node_current->size = memSize;
+        node_current->process_id = processID;
+        node_current->next = new_empty_node;
+      }else{
+        node_current->size = memSize;
+        node_current->process_id = processID;
+      }
+
       break;
+
+
     }else if (node_current->process_id == 0 && node_current->size < memSize){
-      // struct memory_queue *new_queue = (struct memory_queue*) malloc(sizeof(struct memory_queue));
-      // new_queue->next = queue_head;
-      // new_queue->process_id = processID;
-      // new_queue->size = memSize;
-      // queue_head = new_queue;
+
       if (queue_head == NULL){
         struct memory_queue *new_queue = (struct memory_queue*) malloc(sizeof(struct memory_queue));
         new_queue->process_id = processID;
@@ -109,17 +121,19 @@ int allocateMemWithoutQueue( int processID, int memSize ) {
   int success = 0;
   while (node_current!= NULL){
     if (node_current->process_id == 0 && node_current->size >= memSize){
-      // printf("Enough memory\n");
-      // since we need the context to previous node in order to connect from previous node to the new node,
-      struct memory_node *new_empty_node = (struct memory_node*) malloc(sizeof(struct memory_node));
-      // store the current empty node's size - newmem size to the new empty.
-      new_empty_node->process_id = 0;
-      new_empty_node->size = node_current->size - memSize;
-      new_empty_node->start = node_current->start + memSize;
-      new_empty_node->next = node_current->next;
-      node_current->size = memSize;
-      node_current->next = new_empty_node;
-      node_current->process_id = processID;
+      if ((node_current->size - memSize) > 0){
+        struct memory_node *new_empty_node = (struct memory_node*) malloc(sizeof(struct memory_node));
+        new_empty_node->process_id = 0;
+        new_empty_node->size = node_current->size - memSize;
+        new_empty_node->start = node_current->start + memSize;
+        new_empty_node->next = node_current->next;
+        node_current->size = memSize;
+        node_current->process_id = processID;
+        node_current->next = new_empty_node;
+      }else{
+        node_current->size = memSize;
+        node_current->process_id = processID;
+      }
       success = 1;
       break;
     }else if (node_current->process_id == 0 && node_current->size < memSize){
@@ -129,8 +143,11 @@ int allocateMemWithoutQueue( int processID, int memSize ) {
   }
   if (success) {
     queue_current = queue_head;
-    queue_head = queue_current->next;
-    allocateMemWithoutQueue(queue_current->process_id, queue_current->size);
+    if (queue_current != NULL){
+      queue_head = queue_current->next;
+      allocateMemWithoutQueue(queue_current->process_id, queue_current->size);
+    }
+
   }
   return success;
 
@@ -179,19 +196,10 @@ void deleteMem( int processID ) {
   }
 
   mergeFreeMem();
-  allocateMemWithoutQueue(queue_head->process_id, queue_head->size);
+  if (queue_head != NULL){
+    allocateMemWithoutQueue(queue_head->process_id, queue_head->size);
 
-
-
-  // printf("PUT THIS process %d\n", queue_current->process_id);
-  // if (allocateMemWithoutQueue(queue_current->process_id, queue_current->size)){
-  //
-  // }
-
-
-
-
-
+  }
 
 }
 
@@ -224,9 +232,11 @@ int main() {
   initialize();
   allocateMem(1, 400);
   allocateMem(2, 400);
-  allocateMem(3, 200);
-  // deleteMem(1);
-  // deleteMem(2);
+  allocateMem(3, 400);
+  allocateMem(4, 400);
+
+  deleteMem(1);
+  deleteMem(2);
   // deleteMem(1);
   print();
 
