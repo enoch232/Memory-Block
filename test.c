@@ -4,7 +4,7 @@
 #include<stdlib.h>
 #include<unistd.h>
 
-#define MEMORY_SPACE 1024 // number of Default array size
+#define MEMORY_SPACE 1000 // number of Default array size
 
 struct memory_node {
   int process_id;
@@ -100,6 +100,7 @@ void deleteMem( int processID ) {
     if (node_current->process_id == 0){
       if (node_current->next != NULL){
         if (node_current->next->process_id == 0){
+          printf("changed!\n");
           node_current->size = node_current->size + node_current->next->size;
           node_current->next = node_current->next->next;
         }
@@ -116,9 +117,9 @@ void print() {
   node_current = node_head;
   while (node_current!= NULL){
     if (node_current->process_id > 0){
-      printf("Process %d:           %dkB     Start Address: %d    End Address: %d\n", node_current->process_id, node_current->size, node_current->start, node_current->start + node_current->size);
+      printf("Process %d:           %dkB     Start Address: 0x%08X    End Address: 0x%08X\n", node_current->process_id, node_current->size, node_current->start * 1000, (node_current->start + node_current->size) * 1000 - 1);
     }else{
-      printf("Empty Block %d:       %dkB     Start Address: %d    End Address: %d\n", node_current->process_id, node_current->size, node_current->start, node_current->start + node_current->size);
+      printf("Empty Block:          %dkB     Start Address: 0x%08X    End Address: 0x%08X\n", node_current->size, node_current->start * 1000, (node_current->start + node_current->size) * 1000 - 1);
     }
 
     node_current = node_current->next;
@@ -131,9 +132,19 @@ void print() {
 
 int main() {
   initialize();
-  allocateMem(1, 200);
-  allocateMem(2, 500);
-  allocateMem(2, 100);
+  allocateMem(1, 400);
+  allocateMem(2, 200);
+  allocateMem(3, 500);
+  print();
+  deleteMem(1);
+  print();
+  allocateMem(4, 100);
+  print();
+  deleteMem(2);
+  print();
+  deleteMem(4);
+  print();
+  deleteMem(3);
   print();
   // deleteMem(1);
 
