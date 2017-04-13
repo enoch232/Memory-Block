@@ -230,30 +230,30 @@ void print() {
 
 int main() {
   initialize();
-  allocateMem(1, 400);
-  allocateMem(2, 400);
-  allocateMem(3, 400);
-  allocateMem(4, 400);
-
-  deleteMem(1);
-  deleteMem(2);
-  // deleteMem(1);
-  print();
-
   // allocateMem(1, 400);
-  // allocateMem(2, 200);
-  // allocateMem(3, 500);
-  // print();
+  // allocateMem(2, 400);
+  // allocateMem(3, 400);
+  // allocateMem(4, 400);
+  //
   // deleteMem(1);
-  // print();
-  // allocateMem(4, 100);
-  // print();
   // deleteMem(2);
+  // // deleteMem(1);
   // print();
-  // deleteMem(4);
-  // print();
-  // deleteMem(3);
-  // print();
+
+  allocateMem(1, 400);
+  allocateMem(2, 200);
+  allocateMem(3, 500);
+  print();
+  deleteMem(1);
+  print();
+  allocateMem(4, 100);
+  print();
+  deleteMem(2);
+  print();
+  deleteMem(4);
+  print();
+  deleteMem(3);
+  print();
 
 
 
