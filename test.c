@@ -81,6 +81,47 @@ void allocateMem( int processID, int memSize ) {
 
 }
 
+int allocateMemWithoutQueue( int processID, int memSize ) {
+  // Loop through the memory node to check for any empty blocks that have enough room for this one.
+  // printf("Add Process %d with memory %d\n", processID, memSize);
+  node_current = node_head;
+  int success = 0;
+  while (node_current!= NULL){
+    if (node_current->process_id == 0 && node_current->size >= memSize){
+      // printf("Enough memory\n");
+      // since we need the context to previous node in order to connect from previous node to the new node,
+      struct memory_node *new_empty_node = (struct memory_node*) malloc(sizeof(struct memory_node));
+      // store the current empty node's size - newmem size to the new empty.
+      new_empty_node->process_id = 0;
+      new_empty_node->size = node_current->size - memSize;
+      new_empty_node->start = node_current->start + memSize;
+      new_empty_node->next = node_current->next;
+      node_current->size = memSize;
+      node_current->next = new_empty_node;
+      node_current->process_id = processID;
+      success = 1;
+      break;
+    }else if (node_current->process_id == 0 && node_current->size < memSize){
+    }else{
+    }
+    node_current = node_current->next;
+  }
+  if (success) {
+    queue_current = queue_head;
+    while (queue_current!= NULL){
+      if (queue_current->next== NULL){
+        break;
+      }
+      queue_current = queue_current->next;
+
+    }
+    queue_current = NULL;
+    // allocateMemWithoutQueue();
+  }
+  return success;
+
+}
+
 int mergeFreeMem() {
   node_current = node_head;
   int changed = 0;
@@ -124,7 +165,16 @@ void deleteMem( int processID ) {
   }
 
   mergeFreeMem();
-  
+
+
+
+  // printf("PUT THIS process %d\n", queue_current->process_id);
+  // if (allocateMemWithoutQueue(queue_current->process_id, queue_current->size)){
+  //
+  // }
+
+
+
 
 
 
@@ -161,7 +211,7 @@ int main() {
   allocateMem(2, 400);
   allocateMem(3, 400);
   allocateMem(4, 400);
-  // deleteMem(1);
+  deleteMem(1);
   // deleteMem(2);
   // deleteMem(1);
   print();
