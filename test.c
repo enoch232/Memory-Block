@@ -97,6 +97,7 @@ int mergeFreeMem() {
   if (changed) {
     mergeFreeMem();
   }
+  return changed;
 }
 
 void deleteMem( int processID ) {
