@@ -165,6 +165,7 @@ void deleteMem( int processID ) {
   }
 
   mergeFreeMem();
+  allocateMemWithoutQueue(queue_head->process_id, queue_head->size);
 
 
 
