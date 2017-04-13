@@ -18,14 +18,14 @@ struct memory_queue {
   int size;
   struct memory_queue *next;
 };
-
+struct memory_node *node_head;
 struct memory_node *node_current = NULL;
 
 struct memory_queue *queue_head = NULL;
 struct memory_queue *queue_current = NULL;
 
 void initialize(){
-  struct memory_node *node_head = (struct memory_node*) malloc(sizeof(struct memory_node));
+  node_head = (struct memory_node*) malloc(sizeof(struct memory_node));
   node_head->next = NULL;
   node_head->process_id = 0; // Empty Block
   node_head->size = MEMORY_SPACE;
@@ -34,6 +34,29 @@ void initialize(){
 
 void allocateMem( int processID, int memSize ) {
   // Loop through the memory node to check for any empty blocks that have enough room for this one.
+  printf("Add Process %d with memory %d\n", processID, memSize);
+  node_current = node_head;
+  while (node_current!= NULL){
+    printf("size: %d\n", node_current->size);
+    if (node_current->process_id == 0 && node_current->size >= memSize){
+      printf("Enough memory\n");
+      // since we need the context to previous node in order to connect from previous node to the new node,
+      struct memory_node *new_empty_node = (struct memory_node*) malloc(sizeof(struct memory_node));
+      // store the current empty node's size - newmem size to the new empty.
+      new_empty_node->process_id = 0;
+      new_empty_node->size = node_current->size - memSize;
+      new_empty_node->start = node_current->start + memSize;
+      new_empty_node->next = node_current->next;
+      node_current->size = memSize;
+      node_current->next = new_empty_node;
+      node_current->process_id = processID;
+      break;
+    }else{
+      printf("Not enough memory\n");
+    }
+    node_current = node_current->next;
+
+  }
 
   // choose the first one that has memory by comparing the memory sizes.
 
@@ -47,10 +70,9 @@ void allocateMem( int processID, int memSize ) {
 
   // now also loop through to check which one has the address of 0, and it will point to it.
 
+  // The nodes that were pointing to the next one would be changed as well.
+
   // if the memory doesnt not have enough memory, store in to queue.
-
-  struct memory_node *new_node = (struct memory_node*) malloc(sizeof(struct memory_node));
-
 
 }
 
@@ -76,6 +98,8 @@ void print() {
 
 int main() {
   initialize();
+  allocateMem(1, 500);
+  allocateMem(2, 500);
 
 
 }
